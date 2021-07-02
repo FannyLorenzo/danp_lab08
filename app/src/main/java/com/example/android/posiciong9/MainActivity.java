@@ -18,6 +18,8 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView position;
     private String txtposition="";
+    private TextView situacion;
+    private String txtsituacion="";
     int whip=0;
 
     @Override
@@ -29,24 +31,11 @@ public class MainActivity extends AppCompatActivity {
 
         sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorGravity_ = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
-        sensorMagneticFiel = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
         position = (TextView) findViewById(R.id.posicion);
-/*
-        if(sensorMagneticFiel ==null){
-            System.out.println(" Su dispositivo no cuenta con el sensor CAMPO MAGNÉTICO");
-            finish();
-        }
-        if(sensorGravity ==null) {
-            System.out.println(" Su dispositivo no cuenta con el sensor GRAVITY");
-            finish();
-        }
-        if(sensorGravity ==null) {
-            System.out.println(" Su dispositivo no cuenta con el sensor GRAVITY");
-            finish();
-        }
+        situacion = (TextView) findViewById(R.id.situacion);
 
-  */     if(sensorAccelerometer ==null) {
+    if(sensorAccelerometer ==null) {
             System.out.println(" Su dispositivo no cuenta con el sensor ACCELEROMETER");
             finish();
         }
@@ -55,34 +44,60 @@ public class MainActivity extends AppCompatActivity {
             public void onSensorChanged(SensorEvent sensorEvent) {
                 double li = 5;
                 double lj = 10;
+                double g = 9.80665;
+                txtposition = "";
 
+                // b. manejando la aceleración total (lineal + gravedad = sensor acelerómetro)
                 float x=sensorEvent.values[0];
                 float y=sensorEvent.values[1];
                 float z=sensorEvent.values[2];
-                System.out.println(" position X: "+ x + " Y: "+ y +" Z: "+ z);
-                //position.setText(" position X: "+ x + " Y: "+ y +" Z: "+ z);
-                if(x>=0 && x<=li && y >0 && y <=lj ){ //&& whip==0
+
+                txtposition = "X: "+  (double)(Math.round(x * 100.0) / 100.0) + " Y: "+
+                                (double)(Math.round(y * 100.0) / 100.0) +" Z: "+
+                                (double)(Math.round(z * 100.0) / 100.0);
+                System.out.println(x+ " , "+ y + " , "+z);
+                position.setText(txtposition);
+
+                // c. manejando la caida libre;
+                if(z>g || z<-g|| y >g || y <-g || x >g || x <-g) {
+                    txtsituacion = "caidaa¡¡¡";
+                    getWindow().getDecorView().setBackgroundColor(Color.RED);
+                }else if(z>li && z<=lj) {
                     //whip++;
-                    position.setText("VERTICAL 1");
+                    txtsituacion = ("echado - boca arriba");
+                    getWindow().getDecorView().setBackgroundColor(Color.BLACK);
+                }else if(z<-li && z<=-lj) {
+                    //whip++;
+                    txtsituacion =("echado - boca abajo");
+                    getWindow().getDecorView().setBackgroundColor(Color.BLACK);
+                }else if(x>=0 && x<=li && y >0 && y <=lj ){ //&& whip==0
+                    //whip++;
+                    txtsituacion =(" sostenido - parado");
                     getWindow().getDecorView().setBackgroundColor(Color.BLUE);
                 }else if(x>=-li && x<=0 && y >-lj && y <=0 ){
                     //whip++;
-                    position.setText("VERTICAL 2");
+                    txtsituacion =(" sostenido - de cabeza");
                     getWindow().getDecorView().setBackgroundColor(Color.BLUE);
                 }else if(x>=-lj && x<=0 && y >0 && y <=li ){
                     //whip++;
-                    position.setText("HORIZONTAL 1");
-                    getWindow().getDecorView().setBackgroundColor(Color.RED);
+                    txtsituacion =("sostenido - de costado - derecha");
+                    getWindow().getDecorView().setBackgroundColor(Color.BLUE);
                 }else if(x>=0 && x<=lj && y >-li && y <=0 ){
                     //whip++;
-                    position.setText("HORIZONTAL 2");
-                    getWindow().getDecorView().setBackgroundColor(Color.RED);
-                }
-                /*
-                else{
-                    position.setText(" NI VERTICAL NI HORIZONTAL");
+                    txtsituacion =("sostenido - de costado - izquierda");
+                    getWindow().getDecorView().setBackgroundColor(Color.BLUE);
+                }else if(x<-li ) {
+                    //whip++;
+                    txtsituacion =("inclinado - derecha");
                     getWindow().getDecorView().setBackgroundColor(Color.BLACK);
-                }*/
+                }else if(x>li ) {
+                    //whip++;
+                    txtsituacion =("inclinado - izquierda");
+                    getWindow().getDecorView().setBackgroundColor(Color.BLACK);
+                }
+                System.out.println(">> Situacion: "+txtsituacion);
+                situacion.setText(txtsituacion);
+
             }
 
             @Override
